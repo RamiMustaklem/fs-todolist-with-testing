@@ -1,5 +1,12 @@
+import TodoList from '../components/TodoList';
+
 function Home() {
-  return <h1>Hello World</h1>;
+  return (
+    <div>
+      <h1 className="text-3xl font-bold">Todo App</h1>
+      <TodoList />
+    </div>
+  );
 }
 
 export default Home;
