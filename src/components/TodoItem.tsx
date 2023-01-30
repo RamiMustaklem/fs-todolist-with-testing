@@ -1,27 +1,31 @@
-import { useState } from 'react';
+import { FormEvent, useRef, useState } from 'react';
+import { useLocalStorage } from 'react-use';
+import { Todo } from '../types';
 
 import { ReactComponent as EditIcon } from '../assets/edit.svg';
 import { ReactComponent as DeleteIcon } from '../assets/trash.svg';
 import { ReactComponent as SubmitIcon } from '../assets/check-circle.svg';
 
-type Props = {
-  id: number;
-  text: string;
-  complete: boolean;
-};
+type Props = Todo;
 
 function TodoItem({ id, text, complete }: Props) {
   const [isComplete, setIsComplete] = useState(complete);
   const [todoText, setTodoText] = useState(text);
   const [isEditing, setIsEditing] = useState(false);
 
-  const onFormSubmitHandler = () => {
+  const [, setTodos, remove] = useLocalStorage<Todo[]>('todos', []);
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const onFormSubmitHandler = (e: FormEvent) => {
+    e.preventDefault();
     // send to api
     setIsEditing(false);
   };
 
   const deleteTodoHandler = () => {
     // send delete todo to api
+    remove();
   };
 
   return (
@@ -44,6 +48,7 @@ function TodoItem({ id, text, complete }: Props) {
             className="flex-1 flex items-center space-x-4"
           >
             <input
+              ref={inputRef}
               type="text"
               value={todoText}
               onChange={(e) => setTodoText(e.target.value)}
@@ -71,7 +76,12 @@ function TodoItem({ id, text, complete }: Props) {
       <div className="space-x-3 flex items-center ml-10">
         <button
           type="button"
-          onClick={() => setIsEditing(true)}
+          onClick={() => {
+            setIsEditing(true);
+            setTimeout(() => {
+              inputRef.current?.focus();
+            }, 1);
+          }}
           disabled={isEditing}
           className="text-blue-500 disabled:cursor-not-allowed disabled:opacity-60 disabled:text-gray-400"
           data-testID="edit-button"
