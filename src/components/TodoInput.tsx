@@ -1,38 +1,46 @@
-import { useState, ChangeEvent, FormEvent } from 'react';
+import { FormEvent } from 'react';
 import { useLocalStorage } from 'react-use';
 import { Todo } from '../types';
 
-function TodoInput() {
-  const [value, setValue] = useState('');
+interface FormElements extends HTMLFormElement {
+  todo: HTMLInputElement;
+}
 
+function TodoInput() {
   const [todos, setTodos] = useLocalStorage<Todo[]>('todos', []);
 
-  const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
-    setValue(e.target.value);
-  };
-
-  const onSubmitHandler = (e: FormEvent) => {
+  const onSubmitHandler = (e: FormEvent<HTMLFormElement>) => {
+    const target = e.target as FormElements;
     e.preventDefault();
     // submit new todo to api
     setTodos([
       ...(todos || []),
-      { id: todos?.length || 1, text: value, complete: false },
+      {
+        id: todos?.length || 1,
+        text: target.todo.value,
+        complete: false,
+      },
     ]);
-    setValue('');
+    target.reset();
   };
 
   return (
     <form onSubmit={onSubmitHandler} className="space-x-4 mb-6 flex">
       <input
         type="text"
-        value={value}
-        onChange={onChangeHandler}
+        id="todo"
+        name="todo"
         className="rounded flex-1"
+        // eslint-disable-next-line jsx-a11y/no-autofocus
+        autoFocus
+        required
+        maxLength={60}
+        minLength={3}
+        placeholder="Add your task here"
       />
       <button
         type="submit"
-        className="py-2 px-6 rounded bg-blue-600 text-white cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
-        disabled={!value}
+        className="py-2 px-6 rounded bg-blue-600 text-white cursor-pointer"
       >
         Add
       </button>
