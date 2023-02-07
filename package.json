@@ -14,11 +14,11 @@
     "axios": "^1.2.5",
     "flowbite": "^1.6.3",
     "flowbite-react": "^0.3.8",
+    "jotai": "^2.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-query": "^3.39.3",
     "react-router-dom": "^6.3.0",
-    "react-use": "^17.4.0",
     "vite-plugin-svgr": "^2.4.0"
   },
   "devDependencies": {

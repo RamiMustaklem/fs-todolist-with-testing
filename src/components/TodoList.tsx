@@ -10,10 +10,10 @@ function TodoList({ todos = [] }: Props) {
     <div className="space-y-4">
       {todos?.map((x) => (
         <TodoItem
-          key={`todo-item-${x}`}
+          key={`todo-item-${x.id}`}
           id={x.id}
-          text="todo item"
-          complete={false}
+          text={x.text}
+          complete={x.complete}
         />
       ))}
     </div>

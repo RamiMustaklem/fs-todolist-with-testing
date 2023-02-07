@@ -1,5 +1,6 @@
-import { FormEvent, useRef, useState } from 'react';
-import { useLocalStorage } from 'react-use';
+import { ChangeEvent, FormEvent, useRef, useState } from 'react';
+import { useSetAtom, useAtomValue } from 'jotai';
+import todosAtom from '../todosAtom';
 import { Todo } from '../types';
 
 import { ReactComponent as EditIcon } from '../assets/edit.svg';
@@ -8,24 +9,51 @@ import { ReactComponent as SubmitIcon } from '../assets/check-circle.svg';
 
 type Props = Todo;
 
+interface CustomElement extends HTMLFormElement {
+  todo: HTMLInputElement;
+}
+
 function TodoItem({ id, text, complete }: Props) {
-  const [isComplete, setIsComplete] = useState(complete);
-  const [todoText, setTodoText] = useState(text);
   const [isEditing, setIsEditing] = useState(false);
 
-  const [, setTodos, remove] = useLocalStorage<Todo[]>('todos', []);
+  const todos = useAtomValue(todosAtom);
+  const setTodos = useSetAtom(todosAtom);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
   const onFormSubmitHandler = (e: FormEvent) => {
     e.preventDefault();
+    const target = e.target as CustomElement;
+    const newText = target.todo.value;
     // send to api
     setIsEditing(false);
+    const idx = todos.findIndex((t) => t.id === id);
+    const newArr = [...todos];
+    newArr.splice(idx, 1, {
+      id,
+      text: newText,
+      complete,
+    });
+    setTodos(newArr);
   };
 
   const deleteTodoHandler = () => {
     // send delete todo to api
-    remove();
+    const idx = todos.findIndex((t) => t.id === id);
+    const newArr = [...todos];
+    newArr.splice(idx, 1);
+    setTodos(newArr);
+  };
+
+  const toggleComplete = (event: ChangeEvent<HTMLInputElement>) => {
+    const idx = todos.findIndex((t) => t.id === id);
+    const newArr = [...todos];
+    newArr.splice(idx, 1, {
+      id,
+      text,
+      complete: event.target.checked,
+    });
+    setTodos(newArr);
   };
 
   return (
@@ -37,8 +65,8 @@ function TodoItem({ id, text, complete }: Props) {
         <input
           type="checkbox"
           id={`todo-${id}-complete-toggle`}
-          onChange={(event) => setIsComplete(event.target.checked)}
-          checked={isComplete}
+          onChange={(event) => toggleComplete(event)}
+          checked={complete}
           className="w-6 h-6 rounded"
           aria-label="todo item toggle"
         />
@@ -49,15 +77,15 @@ function TodoItem({ id, text, complete }: Props) {
           >
             <input
               ref={inputRef}
+              name="todo"
               type="text"
-              value={todoText}
-              onChange={(e) => setTodoText(e.target.value)}
+              defaultValue={text}
               className="h-7 rounded flex-1"
             />
             <button
               type="submit"
               className="text-blue-500"
-              data-testID="submit-button"
+              data-testid="submit-button"
             >
               <SubmitIcon />
             </button>
@@ -65,10 +93,10 @@ function TodoItem({ id, text, complete }: Props) {
         ) : (
           <p
             className={`font-semibold text-lg${
-              isComplete ? ' line-through' : ''
+              complete ? ' line-through' : ''
             }`}
           >
-            {todoText}
+            {text}
           </p>
         )}
       </label>
@@ -84,7 +112,7 @@ function TodoItem({ id, text, complete }: Props) {
           }}
           disabled={isEditing}
           className="text-blue-500 disabled:cursor-not-allowed disabled:opacity-60 disabled:text-gray-400"
-          data-testID="edit-button"
+          data-testid="edit-button"
         >
           <EditIcon />
         </button>
@@ -94,7 +122,7 @@ function TodoItem({ id, text, complete }: Props) {
           disabled={isEditing}
           className="text-red-500 disabled:cursor-not-allowed disabled:opacity-60 disabled:text-gray-400"
           onClick={deleteTodoHandler}
-          data-testID="delete-button"
+          data-testid="delete-button"
         >
           <DeleteIcon />
         </button>

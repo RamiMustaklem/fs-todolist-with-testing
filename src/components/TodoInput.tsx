@@ -1,13 +1,15 @@
 import { FormEvent } from 'react';
-import { useLocalStorage } from 'react-use';
+import { useSetAtom, useAtomValue } from 'jotai';
 import { Todo } from '../types';
+import todosAtom from '../todosAtom';
 
 interface FormElements extends HTMLFormElement {
   todo: HTMLInputElement;
 }
 
 function TodoInput() {
-  const [todos, setTodos] = useLocalStorage<Todo[]>('todos', []);
+  const todos = useAtomValue<Todo[]>(todosAtom);
+  const setTodos = useSetAtom(todosAtom);
 
   const onSubmitHandler = (e: FormEvent<HTMLFormElement>) => {
     const target = e.target as FormElements;
@@ -16,7 +18,7 @@ function TodoInput() {
     setTodos([
       ...(todos || []),
       {
-        id: todos?.length || 1,
+        id: todos?.length ? todos[todos.length - 1].id + 1 : 1,
         text: target.todo.value,
         complete: false,
       },
