@@ -4,6 +4,9 @@ import TodoList from '../components/TodoList';
 import { Todo } from '../types';
 import todosAtom from '../todosAtom';
 
+// TODO: Extract some functions to a utility helper functions file
+// TODO: Extract TodoItem component to smaller components inside
+
 function Home() {
   const todos = useAtomValue<Todo[]>(todosAtom);
 
